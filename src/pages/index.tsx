@@ -1,51 +1,100 @@
 import { useState } from "react";
-import Product from "../../src/components/Product";
+import Product from "../../components/Product";
 import Layout from "../../components/Layout";
 import { fetchProducts } from "./api/products";
+import { Search } from "lucide-react";
 
 export default function Home({ products = [] }) {
   
   const [phrase, setPhrase] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
-  // Filter products based on search phrase
-  const filteredProducts = phrase
-    ? products.filter(p => p.name.toLowerCase().includes(phrase.toLowerCase()))
-    : products;
+  // Filter products based on search phrase and category
+  const filteredProducts = products.filter(p => {
+    const matchesPhrase = phrase === '' || 
+      p.name.toLowerCase().includes(phrase.toLowerCase()) ||
+      p.description.toLowerCase().includes(phrase.toLowerCase());
+    const matchesCategory = selectedCategory === '' || p.category === selectedCategory;
+    return matchesPhrase && matchesCategory;
+  });
 
-  const categoriesName = [...new Set(filteredProducts.map(p => p.category))];
+  const categoriesName = [...new Set(products.map(p => p.category))];
 
   return (
 
     <Layout>
-    
-      <input
-        value={phrase}
-        onChange={e => setPhrase(e.target.value)}
-        type="text"
-        placeholder="Search for Products..."
-        className="bg-gray-100 w-full py-2 px-4 rounded-xl" 
-      />
-      
-      <div>
-        {categoriesName.map(categoryName => {
-          // Check if there are products in this category after filtering
-          const productsInCategory = filteredProducts.filter(p => p.category === categoryName);
-          if (productsInCategory.length === 0) return null; // Skip category if no products match
+      <div className="max-w-6xl mx-auto px-4">
+        {/* Search Section */}
+        <div className="relative mb-8">
+          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            value={phrase}
+            onChange={e => setPhrase(e.target.value)}
+            type="text"
+            placeholder="Search for products..."
+            className="bg-gray-100 w-full py-3 px-12 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
+          />
+        </div>
 
-          return (
+        {/* Categories Filter */}
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            onClick={() => setSelectedCategory('')}
+            className={`px-4 py-2 rounded-full transition-all whitespace-nowrap
+              ${selectedCategory === '' 
+                ? 'bg-emerald-500 text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          >
+            All Categories
+          </button>
+          {categoriesName.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-2 rounded-full transition-all capitalize whitespace-nowrap
+                ${selectedCategory === cat 
+                  ? 'bg-emerald-500 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-            <div key={categoryName}>
-              <h2 className="text-2xl py-5 capitalize">{categoryName}</h2>
-              <div className="flex -mx-5 overflow-x-scroll snap-x scrollbar-hide">
-                {productsInCategory.map(productInfo => (
-                  <div key={productInfo.name} className="px-5 snap-start">
-                    <Product {...productInfo} />
-                  </div>
-                ))}
+        {/* Products Grid */}
+        <div className="space-y-8">
+          {categoriesName.map(categoryName => {
+            const productsInCategory = filteredProducts.filter(p => p.category === categoryName);
+            if (productsInCategory.length === 0) return null;
+
+            return (
+              <div key={categoryName} className="scroll-mt-8" id={categoryName}>
+                <h2 className="text-2xl font-bold mb-6 capitalize flex items-center">
+                  <span className="mr-2">{categoryName}</span>
+                  <span className="text-sm font-normal text-gray-500">
+                    ({productsInCategory.length} items)
+                  </span>
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {productsInCategory.map(productInfo => (
+                    <div key={productInfo.name} className="w-full">
+                      <Product {...productInfo} />
+                    </div>
+                  ))}
+                </div>
               </div>
+            );
+          })}
+
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-semibold text-gray-700">No products found</h3>
+              <p className="text-gray-500 mt-2">Try adjusting your search or filter criteria</p>
             </div>
-          );
-        })}
+          )}
+        </div>
       </div>
         
     </Layout>

@@ -1,12 +1,22 @@
 import Layout from "../../../components/Layout";
 import { useContext } from "react";
 import { ProductsContext } from "../../../components/ProductsContext";
+import { useRouter } from 'next/router';
 
 export default function InvoicePage({orderData}) {
-  // Include ProductsContext to maintain cart state
+  const router = useRouter();
+  const { selectedProducts, setSelectedProducts } = useContext(ProductsContext);
 
-  // const orderData = Order.findOne({_id : orderid});
-  const { selectedProducts } = useContext(ProductsContext);
+  // Format date consistently using UTC to avoid hydration errors
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'UTC'  // Use UTC to ensure consistency
+    });
+  };
 
   if (!orderData) {
     return (
@@ -16,14 +26,21 @@ export default function InvoicePage({orderData}) {
     );
   }
 
+  const handleReturnHome = () => {
+    // Clear the cart by setting selectedProducts to empty array
+    setSelectedProducts([]);
+    // Redirect to home page
+    router.push('/');
+  };
+
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto bg-white rounded-xl">
+      <div className="max-w-3xl mx-auto bg-white rounded-xl p-6">
         <div className="border-b border-emerald-500 pb-4 mb-6">
           <h1 className="text-2xl font-bold text-emerald-500">Order Confirmation</h1>
           <p className="text-gray-600 mt-2">Order #{orderData.id}</p>
           <p className="text-gray-600">
-            Date: {new Date(orderData.orderDate).toLocaleDateString()}
+            Date: {formatDate(orderData.orderDate)}
           </p>
         </div>
         
@@ -81,12 +98,21 @@ export default function InvoicePage({orderData}) {
           </div>
         </div>
         
-        <button 
-          onClick={() => window.print()} 
-          className="bg-emerald-500 px-5 py-2 rounded-xl font-bold text-white w-full my-4 shadow-emerald-300 shadow-lg"
-        >
-          Print Invoice
-        </button>
+        <div className="space-y-4 mt-6">
+          <button 
+            onClick={() => window.print()} 
+            className="bg-emerald-500 px-5 py-2 rounded-xl font-bold text-white w-full shadow-emerald-300 shadow-lg hover:bg-emerald-600 transition-colors"
+          >
+            Print Invoice
+          </button>
+          
+          <button 
+            onClick={handleReturnHome}
+            className="bg-gray-500 px-5 py-2 rounded-xl font-bold text-white w-full shadow-gray-300 shadow-lg hover:bg-gray-600 transition-colors"
+          >
+            Return to Home
+          </button>
+        </div>
       </div>
     </Layout>
   );

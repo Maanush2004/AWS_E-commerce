@@ -54,7 +54,7 @@ export default function CheckOut() {
     for (let name of selectedProducts) {
       const product = productInfo.find(p => p.name === name);
       if (product) {
-        subtotal += product.price;
+        subtotal += Number(product.price);
       }
     }
   }
