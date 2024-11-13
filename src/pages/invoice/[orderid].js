@@ -1,10 +1,6 @@
 import Layout from "../../../components/Layout";
 import { useContext } from "react";
 import { ProductsContext } from "../../../components/ProductsContext";
-import { initMongoose } from '../../../lib/mongoose';
-import Order from '../../../models/order';
-import { useRouter } from 'next/router';
-
 
 export default function InvoicePage({orderData}) {
   // Include ProductsContext to maintain cart state
@@ -25,7 +21,7 @@ export default function InvoicePage({orderData}) {
       <div className="max-w-3xl mx-auto bg-white rounded-xl">
         <div className="border-b border-emerald-500 pb-4 mb-6">
           <h1 className="text-2xl font-bold text-emerald-500">Order Confirmation</h1>
-          <p className="text-gray-600 mt-2">Order #{orderData._id}</p>
+          <p className="text-gray-600 mt-2">Order #{orderData.id}</p>
           <p className="text-gray-600">
             Date: {new Date(orderData.orderDate).toLocaleDateString()}
           </p>
@@ -97,11 +93,10 @@ export default function InvoicePage({orderData}) {
 }
 
 export async function getServerSideProps({ params }) {
-  await initMongoose();
   
   try {
-    const order = await Order.findById(params.orderid);
-    if (!order) {
+    const order = await fetch(process.env.OrdersAPI+`/?id=${params.orderid}`);
+    if (!order.ok) {
       return {
         notFound: true
       };
@@ -109,7 +104,7 @@ export async function getServerSideProps({ params }) {
 
     return {
       props: {
-        orderData: JSON.parse(JSON.stringify(order))
+        orderData: await order.json()
       }
     };
   } catch (error) {

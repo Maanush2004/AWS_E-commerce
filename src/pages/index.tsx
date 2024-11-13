@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Product from "../../src/components/Product";
 import Layout from "../../components/Layout";
+import { fetchProducts } from "./api/products";
 
 export default function Home({ products = [] }) {
   
@@ -49,16 +50,6 @@ export default function Home({ products = [] }) {
         
     </Layout>
   );
-}
-
-async function fetchProducts() {
-  try {
-      const response = await fetch(process.env.fetchProductsAPI);
-      if (!response.ok) throw new Error('Fetch error');
-      return response.json();
-  } catch (error) {
-      return {};
-  }
 }
 
 export async function getServerSideProps() {

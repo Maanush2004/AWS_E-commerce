@@ -1,13 +1,26 @@
-import { initMongoose } from "../../../lib/mongoose";
-import Order from "../../../models/order";
-import Product from "../../../models/product";
+import { fetchProducts } from "./products";
 
 export default async function handler(req, res) {
-  await initMongoose();
   
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
+  }
+
+  const createOrder = async (orderDetails) => {
+    try {
+      const response = await fetch(process.env.OrdersAPI, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+          body: JSON.stringify(orderDetails),
+      })
+      if (!response.ok) throw new Error('Fetch error');
+      return await response.json()
+    } catch (error) {
+      return {};
+    }
   }
 
   try {
@@ -17,45 +30,44 @@ export default async function handler(req, res) {
       address,
       city,
       phoneno,
-      products: productIds
+      products
     } = req.body;
 
     // Convert comma-separated string to array
-    const productIdArray = productIds.split(',');
+    const productNameArray = products.split(',');
 
     // Get unique product IDs and their quantities
     const productCounts = {};
-    productIdArray.forEach(id => {
-      productCounts[id] = (productCounts[id] || 0) + 1;
+    productNameArray.forEach(name => {
+      productCounts[name] = (productCounts[name] || 0) + 1;
     });
 
     // Fetch product details and calculate totals
     const productDetails = [];
     let subtotal = 0;
     
-    for (const [productId, quantity] of Object.entries(productCounts)) {
-      const product = await Product.findById(productId);
-      if (!product) {
-        res.status(404).json({ error: `Product ${productId} not found` });
+    for (const [productName, quantity] of Object.entries(productCounts)) {
+      const product = await fetchProducts(productName);
+      if (Object.keys(product).length == 0) {
+        res.status(404).json({ error: `Product ${productName} not found` });
         return;
       }
-      
+
       productDetails.push({
-        productId: product._id.toString(),
-        name: product.name,
+        name: product[0].name,
         quantity: quantity,
-        price: product.price,
-        picture: product.picture
+        price: product[0].price,
+        picture: product[0].picture
       });
       
-      subtotal += product.price * quantity;
+      subtotal += product[0].price * quantity;
     }
 
     const delivery = productDetails.length > 0 ? 5 : 0;
     const total = subtotal + delivery;
 
     // Create the order
-    const order = await Order.create({
+    const order = await createOrder({
       name,
       email,
       address,
@@ -64,11 +76,12 @@ export default async function handler(req, res) {
       products: productDetails,
       subtotal,
       delivery,
-      total
+      total,
+      orderDate: new Date()
     });
 
     // Redirect to invoice page
-    res.redirect(303, `/invoice/${order._id}`);
+    res.redirect(303, `/invoice/${order.id}`);
 
   } catch (error) {
     console.error('Checkout error:', error);

@@ -16,9 +16,10 @@ export default function CheckOut() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    
     if (selectedProducts.length > 0) {
       const uniqProducts = [...new Set(selectedProducts)];
-      fetch(process.env.fetchProductsAPI+`/?names=${uniqProducts.join(',')}`)
+      fetch(`/api/products?names=${uniqProducts.join(',')}`)
         .then(response => response.json())
         .then(json => setProductInfo(json))
         .catch(error => console.error(error));
@@ -36,12 +37,12 @@ export default function CheckOut() {
     }
   }, [address, city, name, email, phoneno]);
 
-  function moreOfThisProduct(id) {
-    setSelectedProducts(prev => [...prev, id]);
+  function moreOfThisProduct(name) {
+    setSelectedProducts(prev => [...prev, name]);
   }
 
-  function lessOfThisProduct(id) {
-    const pos = selectedProducts.indexOf(id);
+  function lessOfThisProduct(name) {
+    const pos = selectedProducts.indexOf(name);
     if (pos !== -1) {
       setSelectedProducts(prev => prev.filter((value, index) => index !== pos));
     }
@@ -50,7 +51,7 @@ export default function CheckOut() {
   const delivery = selectedProducts.length > 0 ? 5 : 0;  
   let subtotal = 0;
   if (selectedProducts?.length && productInfo?.length) {
-    for (let id of selectedProducts) {
+    for (let name of selectedProducts) {
       const product = productInfo.find(p => p.name === name);
       if (product) {
         subtotal += product.price;
