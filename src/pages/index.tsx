@@ -1,11 +1,9 @@
 import { useState } from "react";
 import Product from "../../src/components/Product";
-import { initMongoose } from "../../lib/mongoose";
-import { findAllProducts } from "../../src/pages/api/products";
-import { Footer } from "../../components/Footer";
 import Layout from "../../components/Layout";
 
 export default function Home({ products = [] }) {
+  
   const [phrase, setPhrase] = useState('');
 
   // Filter products based on search phrase
@@ -39,7 +37,7 @@ export default function Home({ products = [] }) {
               <h2 className="text-2xl py-5 capitalize">{categoryName}</h2>
               <div className="flex -mx-5 overflow-x-scroll snap-x scrollbar-hide">
                 {productsInCategory.map(productInfo => (
-                  <div key={productInfo._id} className="px-5 snap-start">
+                  <div key={productInfo.name} className="px-5 snap-start">
                     <Product {...productInfo} />
                   </div>
                 ))}
@@ -53,9 +51,18 @@ export default function Home({ products = [] }) {
   );
 }
 
+async function fetchProducts() {
+  try {
+      const response = await fetch(process.env.fetchProductsAPI);
+      if (!response.ok) throw new Error('Fetch error');
+      return response.json();
+  } catch (error) {
+      return {};
+  }
+}
+
 export async function getServerSideProps() {
-  await initMongoose();
-  const products = await findAllProducts();
+  const products = await fetchProducts();
 
   return {
     props: {

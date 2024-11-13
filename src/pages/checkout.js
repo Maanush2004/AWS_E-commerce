@@ -17,8 +17,8 @@ export default function CheckOut() {
 
   useEffect(() => {
     if (selectedProducts.length > 0) {
-      const uniqIds = [...new Set(selectedProducts)];
-      fetch(`/api/products?ids=${uniqIds.join(',')}`)
+      const uniqProducts = [...new Set(selectedProducts)];
+      fetch(process.env.fetchProductsAPI+`/?names=${uniqProducts.join(',')}`)
         .then(response => response.json())
         .then(json => setProductInfo(json))
         .catch(error => console.error(error));
@@ -51,7 +51,7 @@ export default function CheckOut() {
   let subtotal = 0;
   if (selectedProducts?.length && productInfo?.length) {
     for (let id of selectedProducts) {
-      const product = productInfo.find(p => p._id === id);
+      const product = productInfo.find(p => p.name === name);
       if (product) {
         subtotal += product.price;
       }
@@ -103,10 +103,10 @@ export default function CheckOut() {
         <div>No products in the Shopping Cart</div>
       )}
       {productInfo.length > 0 && productInfo.map(product => {
-        const amount = selectedProducts.filter(id => id === product._id).length;
+        const amount = selectedProducts.filter(name => name === product.name).length;
         if (amount === 0) return null;
         return (
-          <div key={product._id} className="flex mb-5">
+          <div key={product.name} className="flex mb-5">
             <div className="bg-gray-100 p-3 rounded-xl shrink-0">
               <img className="w-24" src={product.picture} alt={product.name} />
             </div>
@@ -117,7 +117,7 @@ export default function CheckOut() {
                 <div className="grow">${product.price}</div>
                 <div>
                   <button
-                    onClick={() => lessOfThisProduct(product._id)}
+                    onClick={() => lessOfThisProduct(product.name)}
                     className="border border-emerald-500 px-2 rounded-lg text-emerald-500">
                     -
                   </button>
@@ -125,7 +125,7 @@ export default function CheckOut() {
                     {amount}
                   </span>
                   <button
-                    onClick={() => moreOfThisProduct(product._id)}
+                    onClick={() => moreOfThisProduct(product.name)}
                     className="bg-emerald-500 px-2 rounded-lg text-white">
                     +
                   </button>

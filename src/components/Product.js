@@ -1,11 +1,11 @@
 import { useContext } from "react";
 import { ProductsContext } from "../../components/ProductsContext";
 
-export default function Product({ _id, name, price, description, picture }) {
+export default function Product({ name, price, description, picture }) {
   const { setSelectedProducts } = useContext(ProductsContext);
 
   function addProduct() {
-    setSelectedProducts((prev) => [...prev, _id]);
+    setSelectedProducts((prev) => [...prev, name]);
   }
 
   return (
