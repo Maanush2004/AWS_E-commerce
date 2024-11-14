@@ -73,7 +73,7 @@ export default function InvoicePage({orderData}) {
                     <div className="grow text-gray-600">
                       ${product.price} × {product.quantity}
                     </div>
-                    <div className="text-emerald-500 font-bold">
+                    <div className="text-emerald-500 font-bold pl-4">
                       ${(product.quantity * product.price).toFixed(2)}
                     </div>
                   </div>
