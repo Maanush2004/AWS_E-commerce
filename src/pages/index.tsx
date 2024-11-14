@@ -1,13 +1,19 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import Product from "../../components/Product";
 import Layout from "../../components/Layout";
 import { fetchProducts } from "./api/products";
 import { Search } from "lucide-react";
+import { MerchantContext } from "../../components/MerchantContext";
+import { useRouter } from "next/router";
 
 export default function Home({ products = [] }) {
   
+  const router = useRouter();
+
   const [phrase, setPhrase] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+
+  const {merchant} = useContext(MerchantContext);
 
   // Filter products based on search phrase and category
   const filteredProducts = products.filter(p => {
@@ -25,18 +31,35 @@ export default function Home({ products = [] }) {
     <Layout>
       <div className="max-w-6xl mx-auto px-4">
         {/* Search Section */}
-        <div className="relative mb-8">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+        <div className="relative mb-8 flex items-center space-x-4">
+          <div className="relative flex-grow">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              value={phrase}
+              onChange={e => setPhrase(e.target.value)}
+              type="text"
+              placeholder="Search for products..."
+              className="bg-gray-100 w-full py-3 px-12 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
+            />
           </div>
-          <input
-            value={phrase}
-            onChange={e => setPhrase(e.target.value)}
-            type="text"
-            placeholder="Search for products..."
-            className="bg-gray-100 w-full py-3 px-12 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
-          />
+          {merchant && (
+          <button
+            className="
+              bg-emerald-500 text-white py-2 px-4 rounded-xl
+              transform transition-all duration-200
+              hover:bg-emerald-600 hover:shadow-md 
+              active:bg-emerald-700 active:scale-95
+              focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50
+            "
+           onClick={()=>{router.push('/addproduct')}}
+          >
+            Add Product
+          </button>
+          )}
         </div>
+
 
         {/* Categories Filter */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
