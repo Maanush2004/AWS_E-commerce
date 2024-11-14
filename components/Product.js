@@ -53,7 +53,7 @@ export default function Product({ name, category, price, description, picture })
           `}
           onMouseEnter={() => setIsEditHovered(true)}
           onMouseLeave={() => setIsEditHovered(false)}
-          onClick={()=>window.location.href=`/addproduct?name=${name}&category=${category}&price=${price}&description=${description}&picture=${picture}`}
+          onClick={()=>window.location.href=`/addproduct?name=${name}&category=${category}&price=${price}&description=${description}`}
         >
           {isEditHovered ? 'Edit' : '✏️'}
         </button>

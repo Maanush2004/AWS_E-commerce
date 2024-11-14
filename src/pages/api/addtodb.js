@@ -26,11 +26,10 @@ export default async function handler(req,res) {
             name,
             category,
             price,
-            description,
-            picture
+            description
         } = req.body
 
-        await addToDB({name,category,price,description,picture})
+        await addToDB({name,category,price,description})
 
         res.redirect(303, `/`);
 

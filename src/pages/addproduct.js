@@ -11,29 +11,27 @@ export default function addProduct(props) {
     const [productCategory, setProductCategory] = useState("");
     const [productPrice, setProductPrice] = useState("");
     const [productDescription, setProductDescription] = useState("");
-    const [productPicture, setProductPicture] = useState("");
 
     const [formValid, setFormValid] = useState(false);
 
     // This will run once the component has mounted
     useEffect(() => {
         if (router.isReady) {
-            const { name, category, price, description, picture } = router.query;
+            const { name, category, price, description } = router.query;
             setProductName(name || "");
             setProductCategory(category || "");
             setProductPrice(price || "");
             setProductDescription(description || "");
-            setProductPicture(picture || "");
         }
     }, [router.isReady, router.query]); // Only run when router is ready
 
     useEffect(() => {
-        if (productName && productPrice && productDescription && productPicture) {
+        if (productName && productCategory && productPrice && productDescription ) {
             setFormValid(true);
         } else {
             setFormValid(false);
         }
-    }, [productName, productPrice, productDescription, productPicture]);
+    }, [productName, productCategory, productPrice, productDescription]);
 
     return (
         <Layout>
@@ -70,14 +68,6 @@ export default function addProduct(props) {
                             onChange={e => setProductDescription(e.target.value)}
                             type="text"
                             placeholder="Enter Description"
-                            className="w-full rounded-lg px-4 py-2 mb-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
-                        />
-                        <input
-                            name="picture"
-                            value={productPicture}
-                            onChange={e => setProductPicture(e.target.value)}
-                            type="text"
-                            placeholder="Enter Picture name in bucket"
                             className="w-full rounded-lg px-4 py-2 mb-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
                         />
                         <button
