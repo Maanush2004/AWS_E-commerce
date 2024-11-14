@@ -3,14 +3,17 @@ import { useRouter } from "next/router";
 import { useContext } from "react";
 import { ProductsContext } from "./ProductsContext";
 import { MerchantContext } from "./MerchantContext"; 
+import { LoginContext } from "./LoginContext";
 
 export default function Footer() {
     const router = useRouter();
     const path = router.pathname;
     const { selectedProducts } = useContext(ProductsContext);
     const { merchant } = useContext(MerchantContext);
+    const { Login } = useContext(LoginContext);
 
-    return (
+    return (<>
+        {Login &&
         <footer className="sticky bottom-0 bg-white p-5 w-full flex border-t border-gray-200 justify-center items-center gap-12 text-gray-400">
             <Link href="/" className={`${path === '/' ? 'text-emerald-500' : ''} flex flex-col items-center text-center`}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mb-1">
@@ -28,5 +31,6 @@ export default function Footer() {
             </Link>
 }           
         </footer>
+        }</>
     );
 }

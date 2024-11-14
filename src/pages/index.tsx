@@ -5,10 +5,16 @@ import { fetchProducts } from "./api/products";
 import { Search } from "lucide-react";
 import { MerchantContext } from "../../components/MerchantContext";
 import { useRouter } from "next/router";
+import {LoginContext} from "../../components/LoginContext";
+import {LoginPage} from "./login";
 
 export default function Home({ products = [] }) {
   
   const router = useRouter();
+
+  const {Login} = useContext(LoginContext);
+
+  const [addMessage, setAddMessage] = useState('');
 
   const [phrase, setPhrase] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -26,9 +32,23 @@ export default function Home({ products = [] }) {
 
   const categoriesName = [...new Set(products.map(p => p.category))];
 
+  const handleAddToCart = (product) => {
+    setAddMessage(`${product.name} has been added to your shopping cart!`);
+    setTimeout(() => setAddMessage(''), 3000);
+  };
+
   return (
 
     <Layout>
+      {!Login?<LoginPage/>:<>
+        {/* Success Message */}
+        {addMessage && (
+        <div
+          className="fixed top-16 right-4 bg-emerald-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-50"
+        >
+          {addMessage}
+        </div>
+      )}
       <div className="max-w-6xl mx-auto px-4">
         {/* Search Section */}
         <div className="relative mb-8 flex items-center space-x-4">
@@ -119,7 +139,7 @@ export default function Home({ products = [] }) {
           )}
         </div>
       </div>
-        
+      </>}
     </Layout>
   );
 }

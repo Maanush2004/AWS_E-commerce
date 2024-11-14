@@ -2,6 +2,7 @@ import Layout from "../../components/Layout";
 import { useContext, useEffect, useState } from "react";
 import { ProductsContext } from "../../components/ProductsContext";
 import { useRouter } from "next/router";
+import { LoginContext } from "../../components/LoginContext";
 
 export default function CheckOut() {
   const router = useRouter();
@@ -14,6 +15,23 @@ export default function CheckOut() {
   const [email, setEmail] = useState('');
   const [formValid, setFormValid] = useState(false); 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(false);
+  const [warning, setWarning] = useState('');
+  const {Login} = useContext(LoginContext);
+  const validateForm = (e) => {
+    e.preventDefault();
+    if(!name || !phoneno || !address || !city || !email) {
+      setFormValid(false);
+      setWarning("Please Fill all the above fields before proceeding");
+      return;
+    }
+    setWarning("");
+    e.target.submit();
+  }
+
+  useEffect(()=>{
+    if (!Login) window.location.href = '/'
+  },[])
 
   useEffect(() => {
     
@@ -28,6 +46,7 @@ export default function CheckOut() {
     }
   }, [selectedProducts]);
 
+  
   useEffect(() => {
     // Check if all fields are filled
     if (address && city && name && email && phoneno) {
@@ -36,6 +55,7 @@ export default function CheckOut() {
       setFormValid(false);
     }
   }, [address, city, name, email, phoneno]);
+
 
   function moreOfThisProduct(name) {
     setSelectedProducts(prev => [...prev, name]);
@@ -101,33 +121,33 @@ export default function CheckOut() {
   return (
     <Layout>
       {!productInfo.length && (
-        <div>No products in the Shopping Cart</div>
+                <div className="text-center text-gray-500 font-medium text-bold text-2xl">
+                No products in the Shopping Cart
+              </div>
       )}
       {productInfo.length > 0 && productInfo.map(product => {
         const amount = selectedProducts.filter(name => name === product.name).length;
         if (amount === 0) return null;
         return (
-          <div key={product.name} className="flex mb-5">
+          <div key={product.name} className="flex mb-5 border p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
             <div className="bg-gray-100 p-3 rounded-xl shrink-0">
-              <img className="w-24" src={product.picture} alt={product.name} />
+              <img className="w-24 rounded-md" src={product.picture} alt={product.name} />
             </div>
             <div className="pl-4">
               <h3 className="font-bold text-lg">{product.name}</h3>
               <p className="text-sm leading-4 text-gray-500">{product.description}</p>
-              <div className="flex">
-                <div className="grow">${product.price}</div>
-                <div>
+              <div className="flex items-center">
+                <div className="grow font-semibold text-emerald-600">${product.price}</div>
+                <div className="flex items-center">
                   <button
                     onClick={() => lessOfThisProduct(product.name)}
-                    className="border border-emerald-500 px-2 rounded-lg text-emerald-500">
+                    className="border border-emerald-500 px-2 rounded-lg text-emerald-500 hover:bg-emerald-100 transition">
                     -
                   </button>
-                  <span className="px-5">
-                    {amount}
-                  </span>
+                  <span className="px-5 font-semibold">{amount}</span>
                   <button
                     onClick={() => moreOfThisProduct(product.name)}
-                    className="bg-emerald-500 px-2 rounded-lg text-white">
+                    className="bg-emerald-500 px-2 rounded-lg text-white hover:bg-emerald-600 transition">
                     +
                   </button>
                 </div>
@@ -136,7 +156,7 @@ export default function CheckOut() {
           </div>
         );
       })}
-      <form action="/api/checkout" method="POST">
+      <form onSubmit={validateForm} action="/api/checkout" method="POST" className="mt-4 bg-white p-6 rounded-xl shadow-md">
         <div className="mt-4">
           <input
             name="name"
@@ -144,7 +164,7 @@ export default function CheckOut() {
             onChange={e => setName(e.target.value)}
             type="text"
             placeholder="Your Name"
-            className="w-full rounded-lg px-4 py-2 mb-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+            className="mb-2 w-full rounded-lg px-4 py-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
           />
           <input
             name="phoneno"
@@ -152,7 +172,7 @@ export default function CheckOut() {
             onChange={e => setPhoneno(e.target.value)}
             type="tel"
             placeholder="Enter Phone Number"
-            className="w-full rounded-lg px-4 py-2 mb-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+            className="mb-2 w-full rounded-lg px-4 py-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
           />
           <input
             name="address"
@@ -160,7 +180,7 @@ export default function CheckOut() {
             onChange={e => setAddress(e.target.value)}
             type="text"
             placeholder="Address"
-            className="w-full rounded-lg px-4 py-2 mb-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+            className="mb-2 w-full rounded-lg px-4 py-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
           />
           <input
             name="city"
@@ -168,7 +188,7 @@ export default function CheckOut() {
             onChange={e => setCity(e.target.value)}
             type="text"
             placeholder="City and State"
-            className="w-full rounded-lg px-4 py-2 mb-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+            className="mb-2 w-full rounded-lg px-4 py-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
           />
           
           <input
@@ -177,32 +197,36 @@ export default function CheckOut() {
             onChange={e => setEmail(e.target.value)}
             type="email"
             placeholder="Email address"
-            className="w-full rounded-lg px-4 py-2 mb-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
+            className="mb-2 w-full rounded-lg px-4 py-2 border border-gray-300 focus:outline-none focus:border-emerald-500"
           />
         </div>
-        <div className="mt-4">
+        {warning && (
+          <div className="text-red-500 mt-2 font-semibold text-sm">
+            {warning}
+          </div>
+        )}
+
+      <div className="mt-4">
           <div className="flex my-3">
             <h3 className="grow font-bold text-gray-400">SubTotal: </h3>
             <h3 className="font-bold">${subtotal} </h3>
           </div>
-
           <div className="flex my-3">
             <h3 className="grow font-bold text-gray-400">Delivery: </h3>
             <h3 className="font-bold">${delivery} </h3>
           </div>
-
           <div className="flex my-3 border-t-2 pt-3 border-dashed border-emerald-500">
             <h3 className="grow font-bold text-gray-400">Total: </h3>
             <h3 className="font-bold">${total} </h3>
           </div>
         </div>
-
         <input type="hidden" name="products" value={selectedProducts.join(',')} />
 
         <button
           type="submit"
-          className="bg-emerald-500 px-5 py-2 rounded-xl font-bold text-white w-full my-4 shadow-emerald-300 shadow-lg"
-          disabled={!formValid} 
+          className={`bg-emerald-500 px-5 py-2 rounded-xl font-bold text-white w-full my-4 shadow-lg transition ${
+            !formValid ? "cursor-not-allowed" : "hover:bg-emerald-600"
+          }`}
         >
           Pay ${total}
         </button>
